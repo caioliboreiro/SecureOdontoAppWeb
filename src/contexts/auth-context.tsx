@@ -8,6 +8,7 @@ import api from '@/services/api';
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  getUserRole: () => Profile | undefined;
   login: (email: string, password?: string) => void; 
   logout: () => void;
   loading: boolean;
@@ -131,7 +132,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, getUserRole: () => user?.user.User.role, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

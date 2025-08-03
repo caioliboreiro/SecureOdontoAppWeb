@@ -13,7 +13,7 @@ import AppoitmentImage from '../assets/appointment.png'
 import SmartAppoitment from '../assets/smart-schedule.png'
 
 export default function LandingPage() {
-  const { isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {

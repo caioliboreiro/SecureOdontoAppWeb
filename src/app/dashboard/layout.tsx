@@ -5,13 +5,15 @@ import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { Logo } from "@/components/ui/logo";
+import { Profile } from "@/types";
+import { SimpleHeader } from "@/components/layout/simple-header";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -19,6 +21,8 @@ export default function DashboardLayout({
       router.push('/auth/login');
     }
   }, [isAuthenticated, loading, router]);
+
+  const isAdmin = user?.user.User.role === Profile.ADMIN;
 
   if (loading || !isAuthenticated) {
     return (
@@ -31,5 +35,11 @@ export default function DashboardLayout({
     );
   }
 
-  return <AppShell>{children}</AppShell>;
+  function getLayout() {
+    if (isAdmin){
+      return <AppShell>{children}</AppShell>
+    }
+    return <><SimpleHeader />{children}</>
+  }
+  return getLayout();
 }

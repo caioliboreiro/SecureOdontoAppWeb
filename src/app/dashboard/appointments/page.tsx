@@ -2,7 +2,7 @@
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import type { Appointment } from "@/types";
+import { Profile, type Appointment } from "@/types";
 import { PlusCircle } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { AppointmentCard } from "@/components/appointments/appointment-card";
@@ -15,7 +15,7 @@ import api from "@/services/api";
 import { useAuth } from "@/contexts/auth-context";
 
 export default function AppointmentsPage() {
-  const {user} = useAuth()
+  const {user, getUserRole} = useAuth()
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -26,11 +26,32 @@ export default function AppointmentsPage() {
 
   async function fetchAppointments() {
     try {
-      const response = await api.get(`/users/${user?.user.User.id}/consultations`);
+      const role = getUserRole();
+      let response;
+      switch (role) {
+        case Profile.ADMIN:
+          response = await api.get(
+            `/users/${user?.user.User.id}/consultations`
+          );
+          break;
+        case Profile.CLIENT:
+          response = await api.get(
+            `/clients/${user?.user.profileData.id}/consultations`
+          );
+          break;
+        case Profile.PROFESSIONAL:
+          response = await api.get(
+            `/professionals/${user?.user.profileData.id}/consultations`
+          );
+          break;
+        default:
+          throw new Error("Invalid User!");
+      }
+
       setAppointments(response.data.consultations);
     } catch (error: any) {
       console.error("Error fetching appointments:", error);
-      if(error.response?.data?.message) {
+      if (error.response?.data?.message) {
         toast({
           title: "Erro ao buscar consultas",
           description: error.response.data.message,
@@ -39,7 +60,9 @@ export default function AppointmentsPage() {
       }
       toast({
         title: "Erro ao buscar consultas",
-        description: error.response?.data?.message || "Ocorreu um erro ao buscar as consultas.",
+        description:
+          error.response?.data?.message ||
+          "Ocorreu um erro ao buscar as consultas.",
         variant: "destructive",
       });
     }
@@ -109,16 +132,38 @@ export default function AppointmentsPage() {
   
   const displayedAppointments = getFilteredAppointments();
 
+  function getTitle() {
+    const role = getUserRole();
+
+    if (role != Profile.CLIENT) {
+      return "Gerenciamento de Consultas";
+    }
+
+    return "Consultas";
+  }
+
+  function getDescription() {
+    const role = getUserRole();
+
+    if (role != Profile.CLIENT) {
+      return "Agende, edite e visualize as consultas dos pacientes.";
+    }
+
+    return "Visualize suas consultas";
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-10 px-4 md:px-10">
-      <PageHeader title="Gerenciamento de Consultas" description="Agende, edite e visualize as consultas dos pacientes.">
-        <Button
-          onClick={handleAddNew}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md px-5 py-2 flex items-center gap-2 transition-colors"
-        >
-          <PlusCircle className="w-5 h-5" />
-          Nova Consulta
-        </Button>
+      <PageHeader title={getTitle()} description={getDescription()}>
+        {getUserRole() !== Profile.CLIENT && (
+          <Button
+            onClick={handleAddNew}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md px-5 py-2 flex items-center gap-2 transition-colors"
+          >
+            <PlusCircle className="w-5 h-5" />
+            Nova Consulta
+          </Button>
+        )}
       </PageHeader>
 
       <div className="mb-8 flex flex-col sm:flex-row gap-4 justify-between items-center">
@@ -134,9 +179,8 @@ export default function AppointmentsPage() {
         <ScrollArea className="h-[calc(100vh-320px)]">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pr-4">
             {displayedAppointments.map((appointment) => (
-              <div className="rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 bg-white/90 border-0 group">
+              <div key={appointment.id}  className="rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 bg-white/90 border-0 group">
                 <AppointmentCard 
-                  key={appointment.id} 
                   appointment={appointment} 
                   onEdit={handleEdit}
                   onDelete={() => {handleDelete(appointment.id)}}
@@ -161,3 +205,6 @@ export default function AppointmentsPage() {
     </div>
   );
 }
+
+
+

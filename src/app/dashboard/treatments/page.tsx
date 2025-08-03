@@ -108,6 +108,8 @@ export default function TreatmentsPage() {
     treatment.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  console.log(filteredTreatments);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-10 px-4 md:px-10">
       <PageHeader title="Gerenciamento de Tratamentos" description="Visualize os tratamentos oferecidos. Administradores podem criar e editar.">
@@ -135,9 +137,8 @@ export default function TreatmentsPage() {
         <ScrollArea className="h-[calc(100vh-280px)]">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pr-4">
             {filteredTreatments.map((treatment) => (
-              <div className="rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 bg-white/90 border-0 group">
-                <TreatmentCard 
-                  key={treatment.id} 
+              <div key={treatment.id} className="rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 bg-white/90 border-0 group">
+                <TreatmentCard  
                   treatment={treatment} 
                   onEdit={isAdmin ? handleEdit : undefined}
                   onDelete={isAdmin ? handleDelete : undefined}
