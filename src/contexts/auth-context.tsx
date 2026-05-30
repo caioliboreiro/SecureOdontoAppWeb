@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password?: string) => {
     setLoading(true);
     try {
-      const rawResponse = await fetch('/api/secure/login', {
+      const rawResponse = await fetch('http://localhost:3333/sessions', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ email, password: password ?? '' }),

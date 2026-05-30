@@ -49,7 +49,7 @@ export const formatCPF = (value: string) => {
 };
 
 async function registerUser(data: SignupFormValues) {
-  const response = await fetch('/api/secure/register', {
+  const response = await fetch('http://localhost:3333/register/client', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify({
