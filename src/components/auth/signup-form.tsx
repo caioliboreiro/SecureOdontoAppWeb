@@ -6,8 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from '@/contexts/auth-context';
 import { useToast } from "@/hooks/use-toast";
-import api from "@/services/api";
-import { Profile } from "@/types";
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
@@ -51,20 +49,25 @@ export const formatCPF = (value: string) => {
 };
 
 async function registerUser(data: SignupFormValues) {
-  try {
-    const dataRegister = {
-      name: data.name,
-      email: data.email,
-      cpf: data.cpf.replace(/\D/g, ''), 
+  const response = await fetch('/api/secure/register', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({
+      name:     data.name,
+      email:    data.email,
+      cpf:      data.cpf.replace(/\D/g, ''),
       password: data.password,
-    }
-    const response = await api.post('/register/client', dataRegister);
-    console.log('User registered:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('Error registering user:', error);
-    throw error; 
+    }),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    const err: any = new Error(errData?.message || 'Erro ao criar conta');
+    err.response = { status: response.status, data: errData };
+    throw err;
   }
+
+  return response.json();
 }
 
 export function SignupForm() {
@@ -197,6 +200,9 @@ export function SignupForm() {
             <Link href="/auth/login">Faça login</Link>
           </Button>
         </p>
+        <Link href="/politica-de-seguranca" className="text-xs text-muted-foreground hover:text-blue-600 hover:underline transition">
+          Política de Segurança
+        </Link>
       </CardFooter>
     </Card>
   );

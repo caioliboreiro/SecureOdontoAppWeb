@@ -4,10 +4,18 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 9002",
+    "dev:https": "node server.js",
+    "generate-certs": "node -e \"const os=require('os'); os.platform()==='win32' ? require('child_process').execSync('powershell -ExecutionPolicy Bypass -File scripts/generate-certs.ps1',{stdio:'inherit'}) : require('child_process').execSync('bash scripts/generate-certs.sh',{stdio:'inherit'})\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
+  },
+  "comments": {
+    "dev":         "HTTP puro na porta 9002 — apenas para testes sem certificados",
+    "dev:https":   "DUAL: HTTP 9002 (público) + HTTPS 9443 (dados sensíveis) — requer npm run generate-certs primeiro",
+    "PORT_HTTP":   "variável de ambiente opcional para mudar porta HTTP  (padrão 9002)",
+    "PORT_HTTPS":  "variável de ambiente opcional para mudar porta HTTPS (padrão 9443)"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",

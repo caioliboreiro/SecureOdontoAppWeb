@@ -64,7 +64,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password?: string) => {
     setLoading(true);
     try {
-      const response = await api.post('/sessions', { email, password });
+      const rawResponse = await fetch('/api/secure/login', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, password: password ?? '' }),
+      });
+
+      if (!rawResponse.ok) {
+        const errData = await rawResponse.json().catch(() => ({}));
+        const err: any = new Error(errData?.message || 'Erro na autenticação');
+        err.response = { status: rawResponse.status, data: errData };
+        throw err;
+      }
+
+      const response = { data: await rawResponse.json() };
       
       const token = response.data?.token;
       

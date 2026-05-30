@@ -87,6 +87,9 @@ export function LoginForm() {
             <Link href="/auth/signup">Cadastre-se</Link>
           </Button>
         </p>
+        <Link href="/politica-de-seguranca" className="text-xs text-muted-foreground hover:text-blue-600 hover:underline transition">
+          Política de Segurança
+        </Link>
       </CardFooter>
     </Card>
   );
